@@ -1,4 +1,3 @@
-
 from dotenv import load_dotenv
 import logging
 from stock_war_room_system.controller.step_template import Step
@@ -24,3 +23,4 @@ class CreateFolder(Step):
 
     def _create_folder(self):
         PathSetting().initialize_path()
+

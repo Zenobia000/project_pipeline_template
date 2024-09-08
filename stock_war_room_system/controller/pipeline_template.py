@@ -1,5 +1,6 @@
 import logging
 
+
 # Pipeline Class
 class Pipeline:
     def __init__(self, steps, logger, log_level=logging.INFO):
@@ -13,4 +14,3 @@ class Pipeline:
             data = step.execute(data)
         self.logger.info("Pipeline execution finished")
         return data
-

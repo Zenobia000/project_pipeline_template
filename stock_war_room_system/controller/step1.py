@@ -1,16 +1,19 @@
 import logging
 from configparser import ConfigParser
 from stock_war_room_system.controller.step_template import Step
+
 # from pipeline_step import PipelineStep
 from stock_war_room_system.utils.logger import setup_logger
 
 # Configuration Management
 config = ConfigParser()
-config.read('config.ini')
+config.read("config.ini")
 
 # Environment Variables
 from dotenv import load_dotenv
-load_dotenv('.env')
+
+load_dotenv(".env")
+
 
 # Example Pipeline Steps
 class Step1(Step):
@@ -24,5 +27,3 @@ class Step1(Step):
         # Process data
         print(data + " -> Step1")
         return data + " -> Step1"
-
-

@@ -5,22 +5,27 @@ from bson.objectid import ObjectId
 import yaml
 import json
 
+
 # MongoDBManager 定義部分
 class ConfigLoader:
-    def __init__(self, config_path='D:\python_workspace\Sunny_side_project\stock_war_room_system\config\config.yaml'):
+    def __init__(
+        self,
+        config_path="D:\python_workspace\Sunny_side_project\stock_war_room_system\config\config.yaml",
+    ):
         self.config = self.load_config(config_path)
 
     def load_config(self, config_path):
         """讀取 YAML 設定檔"""
-        with open(config_path, 'r') as file:
+        with open(config_path, "r") as file:
             config = yaml.safe_load(file)
         return config
+
 
 class MongoDBManager:
     def __init__(self, config):
         """初始化 MongoDB 連接"""
-        self.uri = config['database']['mongodb']['uri']
-        self.db_name = config['database']['mongodb']['name']
+        self.uri = config["database"]["mongodb"]["uri"]
+        self.db_name = config["database"]["mongodb"]["name"]
         self.client = MongoClient(self.uri)
         self.db = self.client[self.db_name]
 
@@ -39,35 +44,44 @@ class MongoDBManager:
 
             # 1. 檢查重複的 news_id
             existing_news_ids = collection.find(
-                {"news_id": {"$in": [data['news_id'] for data in data_list]}},
-                {"news_id": 1}
+                {"news_id": {"$in": [data["news_id"] for data in data_list]}},
+                {"news_id": 1},
             )
-            existing_ids = {doc['news_id'] for doc in existing_news_ids}
+            existing_ids = {doc["news_id"] for doc in existing_news_ids}
 
             # 過濾掉已存在的 news_id 的資料
-            new_data_list = [data for data in data_list if data['news_id'] not in existing_ids]
+            new_data_list = [
+                data for data in data_list if data["news_id"] not in existing_ids
+            ]
 
             # 2. 檢查資料內容完全相同的情況
             for data in new_data_list[:]:  # 使用切片來創建副本，以免在迴圈中修改
-                existing_doc = collection.find_one({
-                    "url": data['url'],
-                    "title": data['title'],
-                    "content": data['content'],
-                    "keyword": data['keyword'],
-                    "publish_at": data['publish_at']
-                })
+                existing_doc = collection.find_one(
+                    {
+                        "url": data["url"],
+                        "title": data["title"],
+                        "content": data["content"],
+                        "keyword": data["keyword"],
+                        "publish_at": data["publish_at"],
+                    }
+                )
                 if existing_doc:
-                    logging.info(f"Duplicated document found with same content: {data['url']}")
+                    logging.info(
+                        f"Duplicated document found with same content: {data['url']}"
+                    )
                     new_data_list.remove(data)
 
             # 插入去重後的資料
             if new_data_list:
                 result = collection.insert_many(new_data_list)
-                logging.info(f"Inserted new MongoDB document IDs: {result.inserted_ids}")
+                logging.info(
+                    f"Inserted new MongoDB document IDs: {result.inserted_ids}"
+                )
                 return [str(inserted_id) for inserted_id in result.inserted_ids]
             else:
                 logging.info(
-                    "No new documents to insert. All provided documents are either duplicates or already exist.")
+                    "No new documents to insert. All provided documents are either duplicates or already exist."
+                )
                 return []
 
         except PyMongoError as e:
@@ -135,7 +149,9 @@ class MongoDBManager:
         """更新單筆文件"""
         try:
             collection = self.get_collection(collection_name)
-            result = collection.update_one({"_id": ObjectId(document_id)}, {"$set": updated_data})
+            result = collection.update_one(
+                {"_id": ObjectId(document_id)}, {"$set": updated_data}
+            )
             if result.matched_count > 0:
                 logging.info(f"MongoDB document with ID {document_id} updated.")
             else:
@@ -159,6 +175,7 @@ class MongoDBManager:
             logging.error(f"MongoDB delete error: {e}")
             raise
 
+
 if __name__ == "__main__":
     # 加載配置
     config_loader = ConfigLoader()
@@ -168,7 +185,7 @@ if __name__ == "__main__":
     mongo_manager = MongoDBManager(config)
 
     file_path = "D:\python_workspace\Sunny_side_project\stock_war_room_system\data\processed\stock_news_extraction.json"
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         data_list = json.load(file)  # 將 JSON 資料解析成 Python 字典
 
     # # 批量新增文件 demo data
@@ -180,23 +197,25 @@ if __name__ == "__main__":
     # ]
 
     # 批量插入資料
-    inserted_ids = mongo_manager.create_many_with_deduplication('stock_news', data_list)
+    inserted_ids = mongo_manager.create_many_with_deduplication("stock_news", data_list)
     logging.info(f"Inserted news IDs: {inserted_ids}")
 
     # 查詢資料
     filter_criteria = {"news_id": {"$in": [5708339, 5708340]}}
-    documents = mongo_manager.find_with_filter('stock_news', filter_criteria)
+    documents = mongo_manager.find_with_filter("stock_news", filter_criteria)
     for doc in documents:
         logging.info(f"Found document: {doc}")
 
     # 批量更新資料
     update_criteria = {"news_id": {"$in": [5708339, 5708340]}}
     updated_data = {"status": "archived"}
-    updated_count = mongo_manager.update_many('stock_news', update_criteria, updated_data)
+    updated_count = mongo_manager.update_many(
+        "stock_news", update_criteria, updated_data
+    )
     logging.info(f"Updated {updated_count} documents.")
 
     # 再次查詢以確認更新結果
-    updated_documents = mongo_manager.find_with_filter('stock_news', update_criteria)
+    updated_documents = mongo_manager.find_with_filter("stock_news", update_criteria)
     for doc in updated_documents:
         logging.info(f"Updated document: {doc}")
 
@@ -204,4 +223,3 @@ if __name__ == "__main__":
     # delete_criteria = {"news_id": {"$in": [5708339, 5708340]}}
     # deleted_count = mongo_manager.delete_many('stock_news', delete_criteria)
     # logging.info(f"Deleted {deleted_count} documents.")
-

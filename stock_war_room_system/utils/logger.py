@@ -3,7 +3,7 @@ import logging
 import os
 
 
-def setup_logger(name, filename='test.log', output_dir='..\\data\\logs'):
+def setup_logger(name, filename="test.log", output_dir="..\\data\\logs"):
     logger = logging.getLogger(name)
     # print(f"Logger has handlers: {logger.hasHandlers()}")  # This will show whether handlers are attached
 
@@ -12,7 +12,9 @@ def setup_logger(name, filename='test.log', output_dir='..\\data\\logs'):
         logger.setLevel(logging.INFO)
 
         # Define output format
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
 
         # Set up console output
         ch = logging.StreamHandler()
@@ -32,6 +34,5 @@ def setup_logger(name, filename='test.log', output_dir='..\\data\\logs'):
 
     return logger
 
+
 # 在需要使用 logger 的地方使用 setup_logger 函數
-
-

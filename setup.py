@@ -10,14 +10,11 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/yourusername/my_project",  # 專案的源碼地址或主頁
     packages=find_packages(),  # 自動查找專案中的所有Python包
-    install_requires=[  # 定義安裝依賴
-        "requests>=2.20",
-        "numpy>=1.18.0"
-    ],
+    install_requires=["requests>=2.20", "numpy>=1.18.0"],  # 定義安裝依賴
     classifiers=[  # 用於定義項目類型的分類信息
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.10',  # Python 版本要求
+    python_requires=">=3.10",  # Python 版本要求
 )
